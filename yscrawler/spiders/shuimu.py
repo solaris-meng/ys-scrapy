@@ -3,6 +3,7 @@ import scrapy
 import requests
 import datetime
 import json
+import jieba
 
 import sys
 reload(sys)
@@ -66,13 +67,19 @@ def local_save_json(i):
         fd.write(l+'\n')
 def local_save_txt(i, name):
     fname = 'data/%s_%s' % (name, datetime.date.today().strftime('%Y-%m-%d'))
-
     l = ''
     for k in i:
         l += i[k]
         l += '\t'
     with open(fname, 'a+') as fd:
         fd.write(l+'\n')
+def local_save_txt_split(i, name):
+    fname = 'data/%s_%s_split' % (name, datetime.date.today().strftime('%Y-%m-%d'))
+    wds = jieba.cut(i['p_com_text'], cut_all=True)
+    with open(fname, 'a+') as fd:
+        for w in wds:
+            if w:
+                fd.write(w+'\n')
 
 class ShuimuSpider(scrapy.Spider):
     name = "shuimu"
@@ -166,6 +173,7 @@ class ShuimuSpider(scrapy.Spider):
             if DB == 'local':
                 local_save_json(i)
                 local_save_txt(i, i['p_s1'])
+                local_save_txt_split(i, i['p_s1'])
 
             if True:
                 print('-----start')
